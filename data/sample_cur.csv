@@ -1,0 +1,15 @@
+line_item_id,resource_id,resource_type,region,usage_start_date,usage_end_date,monthly_cost_usd,attachment_state,instance_state,eip_association,snapshot_age_days,size_gb,instance_type,tags
+li-001,vol-0a1aaaa,ebs_volume,us-east-1,2026-06-01,2026-06-30,8.00,unattached,,,,100,,env=dev
+li-002,vol-0b2bbbb,ebs_volume,us-west-2,2026-06-01,2026-06-30,40.00,unattached,,,,500,,env=staging
+li-003,vol-0c3cccc,ebs_volume,us-east-1,2026-06-01,2026-06-30,12.00,unattached,,,,150,,
+li-004,i-0d4dddd,ec2_instance,us-east-1,2026-06-01,2026-06-30,30.00,,stopped,,,,m5.large,env=dev
+li-005,i-0e5eeee,ec2_instance,eu-west-1,2026-06-01,2026-06-30,15.00,,stopped,,,,t3.medium,env=test
+li-006,eipalloc-0f6ffff,elastic_ip,us-east-1,2026-06-01,2026-06-30,3.60,,,unassociated,,,,
+li-007,eipalloc-0a7aaaa,elastic_ip,us-west-2,2026-06-01,2026-06-30,3.60,,,unassociated,,,,
+li-008,snap-0b8bbbb,snapshot,us-east-1,2026-06-01,2026-06-30,5.00,,,,120,100,,
+li-009,snap-0c9cccc,snapshot,us-west-2,2026-06-01,2026-06-30,30.00,,,,200,500,,
+li-010,snap-0dadddd,snapshot,us-east-1,2026-06-01,2026-06-30,2.50,,,,95,50,,
+li-101,vol-1aaaaaa,ebs_volume,us-east-1,2026-06-01,2026-06-30,20.00,attached,,,,250,,env=prod
+li-102,i-1bbbbbb,ec2_instance,us-east-1,2026-06-01,2026-06-30,80.00,,running,,,,m5.xlarge,env=prod
+li-103,eipalloc-1cccccc,elastic_ip,us-east-1,2026-06-01,2026-06-30,0.00,,,associated,,,,
+li-104,snap-1dddddd,snapshot,us-east-1,2026-06-01,2026-06-30,4.00,,,,30,80,,

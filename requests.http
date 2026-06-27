@@ -1,0 +1,53 @@
+### Cloud Cost Optimizer — sample API calls
+### Use with the VS Code "REST Client" extension, or translate to curl.
+### Base URL assumes: uvicorn app.main:app  (http://127.0.0.1:8000)
+
+@base = http://127.0.0.1:8000
+
+### Health check
+GET {{base}}/health
+
+### Open the dashboard (HTML) in a browser
+GET {{base}}/
+
+### 1. Scan the sample CUR -> detect waste -> persist (no enrichment)
+POST {{base}}/scan
+Content-Type: application/json
+
+{}
+
+### 1b. Scan AND run the LLM enrichment layer in one call
+POST {{base}}/scan
+Content-Type: application/json
+
+{ "enrich": true }
+
+### 2. List all findings (sorted by risk score, highest first)
+GET {{base}}/findings
+
+### 2b. Filter findings by type
+GET {{base}}/findings?finding_type=unattached_ebs_volume
+
+### 2c. Filter findings by risk bucket
+GET {{base}}/findings?risk_bucket=Medium
+
+### 3. Enrich a scan's findings (cached per finding type)
+POST {{base}}/enrich/1
+
+### 4. Propose remediation (DEFAULT = dry-run, nothing executes)
+POST {{base}}/remediate/1
+Content-Type: application/json
+
+{}
+
+### 4b. Request real remediation WITHOUT confirmation -> status "proposed"
+POST {{base}}/remediate/1
+Content-Type: application/json
+
+{ "dry_run": false, "confirm": false }
+
+### 4c. Confirmed remediation -> validated + allowlisted, but NOT executed ($0 / no live cloud)
+POST {{base}}/remediate/1
+Content-Type: application/json
+
+{ "dry_run": false, "confirm": true }

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud Cost Optimizer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419; --panel: #1a212b; --line: #2a3543; --text: #e6edf3;
+      --muted: #8b98a5; --accent: #2dd4bf; --high: #f87171; --med: #fbbf24; --low: #6b7785;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+           background: var(--bg); color: var(--text); }
+    header { padding: 20px 28px; border-bottom: 1px solid var(--line); display: flex;
+             align-items: center; gap: 14px; flex-wrap: wrap; }
+    header h1 { font-size: 19px; margin: 0; font-weight: 600; }
+    .badge { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: #14532d;
+             color: #86efac; border: 1px solid #166534; font-weight: 600; }
+    button { background: var(--accent); color: #04201c; border: 0; padding: 9px 16px;
+             border-radius: 7px; font-weight: 600; cursor: pointer; font-size: 13px; }
+    button:hover { filter: brightness(1.08); }
+    button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    main { padding: 24px 28px; max-width: 1280px; margin: 0 auto; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+             gap: 16px; margin-bottom: 24px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+    .card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .card .value { font-size: 30px; font-weight: 700; margin-top: 6px; }
+    .card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .grid2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; margin-bottom: 24px; }
+    @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+    .panel h2 { font-size: 13px; margin: 0 0 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .pill { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 700; }
+    .pill.High { background: #3f1d1d; color: var(--high); }
+    .pill.Medium { background: #3a2e10; color: var(--med); }
+    .pill.Low { background: #232b34; color: var(--low); }
+    code { background: #0b0f14; padding: 2px 6px; border-radius: 5px; font-size: 12px; color: #9fe7dc; }
+    .impact { color: var(--muted); font-size: 12px; max-width: 360px; }
+    #toast { position: fixed; bottom: 22px; right: 22px; max-width: 460px; background: var(--panel);
+             border: 1px solid var(--accent); border-radius: 10px; padding: 14px 16px; display: none;
+             box-shadow: 0 8px 30px rgba(0,0,0,.5); }
+    #toast .t-status { font-weight: 700; color: var(--accent); font-size: 13px; }
+    #toast .t-msg { font-size: 12px; color: var(--muted); margin: 6px 0; }
+    .ring { font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>☁️ Cloud Cost Optimizer &amp; Remediation Engine</h1>
+    <span class="badge">$0 SPEND · SAMPLE DATA · NO LIVE CLOUD</span>
+    <span style="flex:1"></span>
+    <button onclick="runScan()">▶ Run Scan + Enrich</button>
+  </header>
+
+  <main>
+    <div class="cards">
+      <div class="card">
+        <div class="label">Total Monthly Waste</div>
+        <div class="value" id="c-waste">—</div>
+        <div class="sub">across <span id="c-count">0</span> findings</div>
+      </div>
+      <div class="card">
+        <div class="label">Aggregate Risk Score</div>
+        <div class="value"><span id="c-risk">—</span><span style="font-size:15px;color:var(--muted)">/100</span></div>
+        <div class="sub">bucket: <span id="c-bucket" class="pill Low">—</span></div>
+      </div>
+      <div class="card">
+        <div class="label">Priority Breakdown</div>
+        <div class="value ring">
+          <span class="pill High" id="c-high">0</span>
+          <span class="pill Medium" id="c-med">0</span>
+          <span class="pill Low" id="c-low">0</span>
+        </div>
+        <div class="sub">High · Medium · Low</div>
+      </div>
+      <div class="card">
+        <div class="label">Annualized Waste</div>
+        <div class="value" id="c-annual">—</div>
+        <div class="sub">monthly × 12</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <h2>Waste by Finding Type</h2>
+        <canvas id="chart" height="150"></canvas>
+      </div>
+      <div class="panel">
+        <h2>Risk Distribution</h2>
+        <canvas id="riskChart" height="150"></canvas>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Findings (highest risk first)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Resource</th><th>Type</th><th>Region</th>
+            <th class="num">Waste/mo</th><th>Risk</th><th>Impact &amp; Remediation</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="7" style="color:var(--muted)">Click “Run Scan + Enrich” to begin.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <div id="toast">
+    <div class="t-status" id="toast-status"></div>
+    <div class="t-msg" id="toast-msg"></div>
+    <code id="toast-cmd"></code>
+  </div>
+
+  <script>
+    const usd = n => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n || 0);
+    let barChart, riskChart;
+
+    async function runScan() {
+      const scan = await (await fetch('/scan', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enrich: true }),
+      })).json();
+      renderCards(scan);
+      renderCharts(scan);
+      await loadFindings();
+    }
+
+    function renderCards(s) {
+      const agg = s.aggregate_risk;
+      document.getElementById('c-waste').textContent = usd(s.total_monthly_waste_usd);
+      document.getElementById('c-count').textContent = s.total_findings;
+      document.getElementById('c-annual').textContent = usd(s.total_monthly_waste_usd * 12);
+      document.getElementById('c-risk').textContent = agg.aggregate_score;
+      const b = document.getElementById('c-bucket');
+      b.textContent = agg.bucket; b.className = 'pill ' + agg.bucket;
+      document.getElementById('c-high').textContent = agg.counts.High;
+      document.getElementById('c-med').textContent = agg.counts.Medium;
+      document.getElementById('c-low').textContent = agg.counts.Low;
+    }
+
+    function renderCharts(s) {
+      const byType = {};
+      s.findings.forEach(f => { byType[f.finding_type] = (byType[f.finding_type] || 0) + f.monthly_waste_usd; });
+      const labels = Object.keys(byType);
+      const data = labels.map(l => byType[l]);
+      if (barChart) barChart.destroy();
+      barChart = new Chart(document.getElementById('chart'), {
+        type: 'bar',
+        data: { labels, datasets: [{ data, backgroundColor: '#2dd4bf', borderRadius: 5 }] },
+        options: { plugins: { legend: { display: false } },
+          scales: { x: { ticks: { color: '#8b98a5' }, grid: { display: false } },
+                    y: { ticks: { color: '#8b98a5' }, grid: { color: '#2a3543' } } } },
+      });
+      const c = s.aggregate_risk.counts;
+      if (riskChart) riskChart.destroy();
+      riskChart = new Chart(document.getElementById('riskChart'), {
+        type: 'doughnut',
+        data: { labels: ['High', 'Medium', 'Low'],
+          datasets: [{ data: [c.High, c.Medium, c.Low],
+            backgroundColor: ['#f87171', '#fbbf24', '#6b7785'] }] },
+        options: { plugins: { legend: { labels: { color: '#e6edf3' } } } },
+      });
+    }
+
+    async function loadFindings() {
+      const rows = await (await fetch('/findings')).json();
+      const tbody = document.getElementById('rows');
+      tbody.innerHTML = rows.map(f => `
+        <tr>
+          <td><code>${f.resource_id}</code></td>
+          <td>${f.finding_type}</td>
+          <td>${f.region}</td>
+          <td class="num">${usd(f.monthly_waste_usd)}</td>
+          <td><span class="pill ${f.risk_bucket}">${f.risk_score} ${f.risk_bucket}</span></td>
+          <td>
+            <div class="impact">${f.llm_impact || '<em>not enriched</em>'}</div>
+            ${f.llm_command ? `<code>${f.llm_command}</code>` : ''}
+          </td>
+          <td><button class="ghost" onclick="remediate(${f.id})">Remediate</button></td>
+        </tr>`).join('');
+    }
+
+    async function remediate(id) {
+      const r = await (await fetch('/remediate/' + id, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dry_run: true }),
+      })).json();
+      document.getElementById('toast-status').textContent = 'Status: ' + r.status + (r.allowlisted ? ' (allowlisted)' : ' (blocked)');
+      document.getElementById('toast-msg').textContent = r.message;
+      document.getElementById('toast-cmd').textContent = r.command;
+      const t = document.getElementById('toast');
+      t.style.display = 'block';
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => t.style.display = 'none', 7000);
+    }
+
+    runScan();  // auto-run on load
+  </script>
+</body>
+</html>

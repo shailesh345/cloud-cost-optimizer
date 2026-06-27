@@ -1,0 +1,78 @@
+{
+  "billing_period": {
+    "start": "2026-06-01",
+    "end": "2026-06-30"
+  },
+  "total_findings": 10,
+  "total_monthly_waste_usd": 149.7,
+  "by_finding_type": {
+    "unattached_ebs_volume": {
+      "count": 3,
+      "monthly_waste_usd": 60.0
+    },
+    "idle_instance": {
+      "count": 2,
+      "monthly_waste_usd": 45.0
+    },
+    "unassociated_eip": {
+      "count": 2,
+      "monthly_waste_usd": 7.2
+    },
+    "aged_snapshot": {
+      "count": 3,
+      "monthly_waste_usd": 37.5
+    }
+  },
+  "findings": [
+    {
+      "resource_id": "vol-0a1aaaa",
+      "finding_type": "unattached_ebs_volume",
+      "monthly_waste_usd": 8.0
+    },
+    {
+      "resource_id": "vol-0b2bbbb",
+      "finding_type": "unattached_ebs_volume",
+      "monthly_waste_usd": 40.0
+    },
+    {
+      "resource_id": "vol-0c3cccc",
+      "finding_type": "unattached_ebs_volume",
+      "monthly_waste_usd": 12.0
+    },
+    {
+      "resource_id": "i-0d4dddd",
+      "finding_type": "idle_instance",
+      "monthly_waste_usd": 30.0
+    },
+    {
+      "resource_id": "i-0e5eeee",
+      "finding_type": "idle_instance",
+      "monthly_waste_usd": 15.0
+    },
+    {
+      "resource_id": "eipalloc-0f6ffff",
+      "finding_type": "unassociated_eip",
+      "monthly_waste_usd": 3.6
+    },
+    {
+      "resource_id": "eipalloc-0a7aaaa",
+      "finding_type": "unassociated_eip",
+      "monthly_waste_usd": 3.6
+    },
+    {
+      "resource_id": "snap-0b8bbbb",
+      "finding_type": "aged_snapshot",
+      "monthly_waste_usd": 5.0
+    },
+    {
+      "resource_id": "snap-0c9cccc",
+      "finding_type": "aged_snapshot",
+      "monthly_waste_usd": 30.0
+    },
+    {
+      "resource_id": "snap-0dadddd",
+      "finding_type": "aged_snapshot",
+      "monthly_waste_usd": 2.5
+    }
+  ]
+}
