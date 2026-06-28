@@ -10,6 +10,7 @@ Endpoints:
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
@@ -65,6 +66,14 @@ def health() -> dict:
 def scan(body: ScanRequest | None = None, db: Session = Depends(get_db)) -> ScanResponse:
     """Ingest the sample CUR, run deterministic detectors, persist results."""
     csv_path = body.csv_path if body else None
+    if csv_path is not None and not Path(csv_path).is_file():
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"csv_path '{csv_path}' is not a readable file. "
+                "Leave csv_path null/empty to scan the bundled sample CUR."
+            ),
+        )
     scan_row = run_scan(db, csv_path)
     if body and body.enrich:
         enrich_scan(db, scan_row.id)

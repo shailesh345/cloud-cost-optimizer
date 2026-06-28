@@ -4,13 +4,19 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # --- Scan ------------------------------------------------------------------
 class ScanRequest(BaseModel):
-    csv_path: str | None = None  # defaults to the bundled sample CUR
-    enrich: bool = False         # run the LLM enrichment layer after scanning
+    # Leave null to scan the bundled sample CUR. The example is null (not the
+    # Swagger default "string") so clicking Execute in /docs Just Works.
+    csv_path: str | None = Field(
+        default=None,
+        description="Path to a CUR CSV. Leave null to use the bundled sample.",
+        examples=[None],
+    )
+    enrich: bool = False  # run the LLM enrichment layer after scanning
 
 
 class EnrichResponse(BaseModel):
